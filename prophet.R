@@ -6,7 +6,7 @@ library(lubridate)
 library(prophet)
 library(corrplot)
 library(skimr)
-
+library(openair)
 sp500 <- read.csv(file = "^GSPC.csv")
 
 ###modeling
