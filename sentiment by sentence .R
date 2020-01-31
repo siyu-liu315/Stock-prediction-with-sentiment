@@ -5,6 +5,7 @@ options(scipen = 999)  ## remove scientific notation - but need width
 ## load the packages
 library(tidyverse)
 library(readxl)
+library(plotly)
 
 
 ## new packages for us
@@ -334,13 +335,65 @@ basic = inner_join(tem3,basic)
 setiment_data = basic %>% select(element_id, polarity25:polarity1) 
 setiment_data$average = rowMeans(setiment_data[,2:26])
 
-### clean data by Excel and saved as 2015-sentiments
+### clean data by Excel and saved as 2011-2015 sentiment.xlsx
+### two dataset both have data from 2011-2015 
 
-final = read_xlsx("2015-sentiment.xlsx")
-final$Date = as.Date(final$Date)
 
-ggplot(data = final, aes(x=Date, y=average))+
-  geom_line()
+sentimendata = read_xlsx("2011-2015 sentiment.xlsx")
+sentimendata$Date = as.Date(sentimendata$Date)
+split <- split(sentimendata, format(as.Date(sentimendata$Date), "%Y"))
 
-ggplot(data = final, aes(x=Date, y=Close))+
-  geom_line()
+### check the date by change below date
+  ggplot(data = split$`2012`, aes(x=Date, y=polarity8))+
+    geom_smooth(color = "#FC4E07") +
+    labs(title = "2012 News Sentiment")
+
+
+ggplot(data = split$`2012`, aes(x=Date, y=Close))+
+  geom_smooth(color = "#FC4E07") +
+  labs(title = "2012 S&P500 Price")
+
+
+
+### Check the most popular words
+topics = read_csv("Combined_News_DJIA.csv") 
+topics2 = topics %>% select(Top8) %>% 
+  mutate(Top8 = str_to_lower(Top8))
+topics2 = topics2 %>% 
+  mutate(Top8 = str_remove_all(Top8, "[:punct:]+")) %>% 
+  mutate(Top8 = str_remove_all(Top8, "[:digit:]+"))
+
+# up to 1000 unique words PER statement/document
+# this is not a DTM, the value IS the word
+tw = topics2 %>% separate(col = Top8, 
+                          into = paste0("v", 1:1000))
+
+## what do we have
+tw[1:5, 1:10]
+
+## make the data long/tidy
+tw %>% 
+  pivot_longer(cols = v1:v1000, 
+               names_to = "pos",
+               values_to = "token",
+               values_drop_na = TRUE) %>% 
+  anti_join(get_stopwords(),by = c("token" ="word")) %>% 
+  filter(str_length(token) > 0) %>% ## 去掉空token
+  mutate(pos = str_replace(pos, "v", "")) %>% 
+  mutate_at(vars(pos), as.numeric) -> t  
+t %>%  group_by(token) %>% count(sort=T) %>% print(n=25)
+
+###
+
+
+
+
+
+
+
+
+
+
+
+
+
