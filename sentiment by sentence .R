@@ -333,3 +333,14 @@ basic = inner_join(tem3,basic)
 ### average the sentiment, but most sentiment score are -
 setiment_data = basic %>% select(element_id, polarity25:polarity1) 
 setiment_data$average = rowMeans(setiment_data[,2:26])
+
+### clean data by Excel and saved as 2015-sentiments
+
+final = read_xlsx("2015-sentiment.xlsx")
+final$Date = as.Date(final$Date)
+
+ggplot(data = final, aes(x=Date, y=average))+
+  geom_line()
+
+ggplot(data = final, aes(x=Date, y=Close))+
+  geom_line()
