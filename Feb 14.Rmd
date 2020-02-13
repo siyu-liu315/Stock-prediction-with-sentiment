@@ -1,0 +1,11 @@
+---
+title: "February 14 Update"
+author: "Team 8 Cohort A"
+date: "2/12/2020"
+output: pdf_document
+---
+
+```{r}
+library(tidyverse)
+```
+
