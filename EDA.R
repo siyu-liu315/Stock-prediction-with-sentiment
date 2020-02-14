@@ -37,7 +37,6 @@ ggplot(data = split$`2014`, aes(x = Date, y = Close)) +
 ggplot(data = split$`2015`, aes(x = Date, y = Close)) +
   geom_line(color = "#FC4E07") +
   labs(title = "2015 S&P500 Price")
-
 ggplot(data = split$`2016`, aes(x = Date, y = Close)) +
   geom_line(color = "#FC4E07") +
   labs(title = "2016 S&P500 Price")
