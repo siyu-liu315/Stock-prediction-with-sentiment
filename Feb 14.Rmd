@@ -9,3 +9,19 @@ output: pdf_document
 library(tidyverse)
 ```
 
+```{r}
+#install.packages("twitteR")
+library(twitteR)
+
+consumer_key <- "Db9ShtReQqwmnwfPlN80rYX3Y"
+consumer_secret <- "8eqP5nYdOyXv1AcSB4ofYO63GwaDMV0LVgYoei9GPjozHPjk08"
+access_token <- "1227999098881617921-mbvxI5Slq76GAr3m4nS8eAv2esZq8r"
+access_secret <- "3f4f5d8S7RGbI4QXE1TCNq4krgUe2UKcAyZNvzMd0uVUN"
+
+setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
+```
+
+```{r}
+tweets
+```
+
