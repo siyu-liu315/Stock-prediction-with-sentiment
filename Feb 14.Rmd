@@ -31,7 +31,5 @@ setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
 
 tweets <- searchTwitter('S&P500', n = 1368, lang = 'en') # 1368 is max the api can return
 tweetsdf <- twListToDF(tweets)
-
-
 ```
 
