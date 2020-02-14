@@ -16,6 +16,9 @@ library(wordcloud)
 library(quanteda)
 # devtools::install_github("quanteda/quanteda.corpora")
 library(quanteda.corpora)
+library(openair)
+
+sp500 <- read.csv(file = "timeseries_analysis/S&P500Index.csv")
 ```
 
 ```{r}
@@ -31,5 +34,16 @@ setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
 
 tweets <- searchTwitter('S&P500', n = 1368, lang = 'en') # 1368 is max the api can return
 tweetsdf <- twListToDF(tweets)
+```
+```{r}
+# Some EDA
+
+sp <- transform(sp500, date = as.Date(as.character(sp500$caldt), "%Y%m%d"))
+View(sp)
+
+### Overview
+ggplot(data = sp, aes(x = date, y = spindx)) +
+  geom_line(color = "#FC4E07") +
+  labs(title = "1990 - 2019 S&P500 Price")
 ```
 
