@@ -1,0 +1,35 @@
+---
+title: "February 14 Update"
+author: "Team 8 Cohort A"
+date: "2/12/2020"
+output: pdf_document
+---
+
+```{r}
+library(tidyverse)
+library(rvest)
+# install.packages("tidytext")
+library(tidytext)
+# install.packages("wordcloud)
+library(wordcloud)
+# install.packages("quanteda")
+library(quanteda)
+# devtools::install_github("quanteda/quanteda.corpora")
+library(quanteda.corpora)
+```
+
+```{r}
+#install.packages("twitteR")
+library(twitteR)
+
+consumer_key <- "Db9ShtReQqwmnwfPlN80rYX3Y"
+consumer_secret <- "8eqP5nYdOyXv1AcSB4ofYO63GwaDMV0LVgYoei9GPjozHPjk08"
+access_token <- "1227999098881617921-mbvxI5Slq76GAr3m4nS8eAv2esZq8r"
+access_secret <- "3f4f5d8S7RGbI4QXE1TCNq4krgUe2UKcAyZNvzMd0uVUN"
+
+setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
+
+tweets <- searchTwitter('S&P500', n = 1368, lang = 'en') # 1368 is max the api can return
+tweetsdf <- twListToDF(tweets)
+```
+

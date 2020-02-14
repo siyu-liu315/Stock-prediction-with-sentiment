@@ -6,8 +6,13 @@ library(lubridate)
 library(prophet)
 library(corrplot)
 library(skimr)
+library(openair)
 
-sp500 <- read.csv(file = "^GSPC.csv")
+sp500 <- read.csv('timeseries_analysis/S&P500Index.csv')
+nyse <- read.csv('timeseries_analysis/NYSE.csv')
+nasdaq <- read.csv('timeseries_analysis/NASDAQ.csv')
+DJ <- read.csv('timeseries_analysis/NASDAQ.csv')
+
 
 ###modeling
 sp500$Date = as.Date(sp500$Date)
