@@ -52,7 +52,7 @@ aalm <- fit.prophet(aalm,aaldf)
 future60 = make_future_dataframe(sp, 60)
 future60nyse <- make_future_dataframe(nysem,60)
 future60aal = make_future_dataframe(aalm, 60)
-future60aal1<- data.frame(future60aal[wday(future60aal$ds) %in% c(1:5),])
+future60aal1<- data.frame(future60aal[wday(future60aal$ds) %in% c(2:6),])
 names(future60aal1)[1] <- 'ds'
 
 # fit the model to future observations
