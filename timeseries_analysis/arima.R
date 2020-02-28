@@ -28,20 +28,7 @@ create_ts <- function(x){
 data_master <- lapply(data_master, create_ts)
 
 plot_time_series <- function(ts_object, ts_object_name){
-  #' Plot Time Series Object
-  #'
-  #' Creates time series plot utilizing \code{ggplot2} utlizing
-  #' custom themes to ensure plots are
-  #' consistent. Utlizes \code{autoplot} function for plots.
-  #'
-  #' @param ts_object time series object used to create plot
-  #' @param ts_object_name preferred title of plot
-  #' @examples
-  #' data(AirPassengers)
-  #'
-  #' air_pass_ts <- as.ts(AirPassengers)
-  #'
-  #' plot_time_series(air_pass_ts, 'Air Passengers')
+  
   if (is.ts(ts_object) == TRUE){
     if(missing(ts_object_name)) {
       warning('Title for plot not entered!')
@@ -68,20 +55,7 @@ plot_time_series <- function(ts_object, ts_object_name){
 
 # FUNCTION FOR ACF AND PACF PLOTS
 plot_acf_pacf <- function(ts_object, ts_object_name){
-  #' Plot ACF and PACF for Time Series Object
-  #'
-  #' Creates \emph{Autocorrelation} and \emph{Partial Autocorrelation} plot
-  #' utilizing \code{ggplot2} with custom themes to ensure plots are
-  #' consistent. Utlizes \code{autoplot} function for plots.
-  #'
-  #' @param ts_object time series object used to create plot
-  #' @param ts_object_name preferred title of plot
-  #' @examples
-  #' data(AirPassengers)
-  #'
-  #' air_pass_ts <- as.ts(AirPassengers)
-  #'
-  #' plot_acf_pacf(air_pass_ts, 'Air Passengers Data Set')
+  
   if (is.ts(ts_object) == TRUE){
     if(missing(ts_object_name)) {
       warning('Title for plot not entered!')
@@ -113,21 +87,7 @@ plot_acf_pacf <- function(ts_object, ts_object_name){
 
 # Decomposed Plot
 plot_decomp <- function(ts_object, ts_object_name){
-  #' Plots Seasonal Decomposition for Time Series Object
-  #'
-  #' Decomposes time series object to \emph{Seasonal},
-  #' \emph{Remainder}, and \emph{Trend}.
-  #' Utilizing \code{ggplot2} with custom themes to ensure plots are
-  #' consistent. Utlizes \code{autoplot} function for plots.
-  #'
-  #' @param ts_object time series object used to create plot
-  #' @param ts_object_name preferred title of plot
-  #' @examples
-  #' data(AirPassengers)
-  #'
-  #' air_pass_ts <- as.ts(AirPassengers)
-  #'
-  #' plot_decomp(air_pass_ts, 'Air Passengers Data Set')
+
   if (is.ts(ts_object) == TRUE){
     autoplot(stl(ts_object, s.window = "periodic"),
              main = sprintf("Decomposition Plot of %s", ts_object_name),
@@ -143,20 +103,7 @@ plot_decomp <- function(ts_object, ts_object_name){
 # Seasonal Plot
 plot_seasonal <- function(ts_object, ts_object_name){
   
-  #' Plots Seasonal Component for Time Series Object
-  #'
-  #' Plots \emph{Seasonal} aspect of time series object.
-  #' Utilizing \code{ggplot2} with custom themes to ensure plots are
-  #' consistent. Utlizes \code{autoplot} function for plots.
-  #'
-  #' @param ts_object time series object used to create plot
-  #' @param ts_object_name preferred title of plot
-  #' @examples
-  #' data(AirPassengers)
-  #'
-  #' air_pass_ts <- as.ts(AirPassengers)
-  #'
-  #' plot_seasonal(air_pass_ts, 'Air Passengers Data Set')
+  
   if (is.ts(ts_object) == TRUE){
     ggseasonplot(ts_object, xlab="Year",
                  main=sprintf("Seasonal Plot of %s", ts_object_name),
@@ -226,29 +173,12 @@ ggtsdiag_custom <- function(object, ts_object_name, gof.lag = 10,
 }
 
 
-###########################################################################################
-# HERE FOUND AT http://librestats.com/2012/06/11/autoplot-graphical-methods-with-ggplot2/ #
-# BY DREW SCHMIDT WITH SLIGHT MODIFICATIONS TO FIT OUR PLOTS                              #
-###########################################################################################
+##########################
 
 
 autoplot.forecast <- function(forecast, forc_name, ts_object_name, 
                               ..., holdout=NaN){
-  #' Plots Forecasted values for Time Series Models
-  #'
-  #' Borrowed from Drew Schmidt, but modified to fit our aesthetic appeal
-  #' we create a dataframe with all the appropriate sections (i.e. upper and
-  #' lower 95% CI bands, forecasted, actual values, the training time series
-  #' object, and upper and lower 80% CI), the we create a \code{ggplot2} object that
-  #' reflects the forecasted plot
-  #'
-  #' @param forecast forecasted values created using \code{forecast} function
-  #' @param forc_name name of forecasted method included in title
-  #' @param ts_object_name time series name included in title
-  #' @param holdout time series object that contains actual values that can be
-  #' compared to the forecasted values
   
-  # data wrangling
   time <- attr(forecast$x, "tsp")
   time <- seq(time[1], attr(forecast$mean, "tsp")[2], by=1/time[3])
   lenx <- length(forecast$x)
