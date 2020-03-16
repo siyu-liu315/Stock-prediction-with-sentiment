@@ -20,7 +20,7 @@ library(quanteda)
 # devtools::install_github("quanteda/quanteda.corpora")
 library(quanteda.corpora) ## for datasets 
 
-basic = read_csv("Combined_News_DJIA.csv")
+basic = read_csv("sentiment_analysis/Combined_News_DJIA.csv")
 glimpse(basic)
 
 
