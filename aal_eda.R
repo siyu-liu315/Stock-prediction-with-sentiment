@@ -10,3 +10,4 @@ ggplot() +
   labs(title = "American Airline Stock Price Trend in Selected period", 
        subtitle = "Blue - High Price, Red - Low Price")
   
+
