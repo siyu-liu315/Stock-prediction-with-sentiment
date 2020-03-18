@@ -1,12 +1,11 @@
 names(df1)
 try <- head(df1)
-View(try)
 
+
+library(tidyverse)
 library(tidyverse)
 library(tidyverse)
 library(readxl)
-
-
 ## new packages for us
 # install.packages("rvest")
 library(rvest)
@@ -18,7 +17,6 @@ library(wordcloud)
 library(quanteda)
 # devtools::install_github("quanteda/quanteda.corpora")
 library(quanteda.corpora)
-
 names(df1)
 
 ### split the rtweet data by 
@@ -48,7 +46,7 @@ amat <- filter(df1, grepl("AMAT", Symbols))
 amat$index <- seq.int(nrow(amat))
 
 amgn <- filter(df1, grepl("AMGN", Symbols))
-aal$index <- seq.int(nrow(aal))
+amgn$index <- seq.int(nrow(amgn))
 
 amzn <- filter(df1, grepl("AMZN", Symbols))
 amzn$index <- seq.int(nrow(amzn))
@@ -59,9 +57,10 @@ atvi$index <- seq.int(nrow(atvi))
 avgo <- filter(df1, grepl("AVGO", Symbols))
 avgo$index <- seq.int(nrow(avgo))
 
-### runing sentiment for each company:
-## aal
-aal_token = aal %>% 
+
+### alxn sentiment
+
+alxn_token = alxn %>% 
   select(index, `Tweet content`) %>% 
   unnest_tokens(token, `Tweet content`, token = "words",
                 strip_punct = T) %>% 
@@ -70,13 +69,14 @@ aal_token = aal %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_aal = aal_token %>% select(index, value) %>% 
+alxn_data = alxn_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
-  inner_join(aal)
+  inner_join(alxn)
 
-## aapl
-aapl_token = aapl %>% 
+### amat sentiment
+
+amat_token = amat %>% 
   select(index, `Tweet content`) %>% 
   unnest_tokens(token, `Tweet content`, token = "words",
                 strip_punct = T) %>% 
@@ -85,13 +85,14 @@ aapl_token = aapl %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_aapl = aapl_token %>% select(index, value) %>% 
+amat_data = amat_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
-  inner_join(aapl)
+  inner_join(amat)
 
-## adbe
-adbe_token = adbe %>% 
+### amgn sentiment
+
+amgn_token = amgn %>% 
   select(index, `Tweet content`) %>% 
   unnest_tokens(token, `Tweet content`, token = "words",
                 strip_punct = T) %>% 
@@ -100,13 +101,15 @@ adbe_token = adbe %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_adbe = adbe_token %>% select(index, value) %>% 
+amgn_data = amgn_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
-  inner_join(adbe)
+  inner_join(amgn)
 
-## adp
-adp_token = adp %>% 
+
+### amzn sentiment
+
+amzn_token = amzn %>% 
   select(index, `Tweet content`) %>% 
   unnest_tokens(token, `Tweet content`, token = "words",
                 strip_punct = T) %>% 
@@ -115,13 +118,14 @@ adp_token = adp %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_adp = adp_token %>% select(index, value) %>% 
+amzn_data = amzn_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
-  inner_join(adp)
+  inner_join(amzn)
 
-### adsk
-adsk_token = adsk %>% 
+### atvi sentiment
+
+atvi_token = atvi %>% 
   select(index, `Tweet content`) %>% 
   unnest_tokens(token, `Tweet content`, token = "words",
                 strip_punct = T) %>% 
@@ -130,14 +134,15 @@ adsk_token = adsk %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_adsk = adsk_token %>% select(index, value) %>% 
+atvi_data = atvi_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
-  inner_join(adsk)
+  inner_join(atvi)
 
 
-### akam
-akam_token = akam %>% 
+### avgo sentiment
+
+avgo_token = avgo %>% 
   select(index, `Tweet content`) %>% 
   unnest_tokens(token, `Tweet content`, token = "words",
                 strip_punct = T) %>% 
@@ -146,9 +151,12 @@ akam_token = akam %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_akam = akam_token %>% select(index, value) %>% 
+avgo_data = avgo_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
-  inner_join(akam)
+  inner_join(avgo)
+
+
+
 
 
