@@ -8,7 +8,7 @@ library(readxl)
 
 
 ## new packages for us
-# install.packages("rvest")
+#install.packages("rvest")
 library(rvest)
 # install.packages("tidytext")
 library(tidytext)
