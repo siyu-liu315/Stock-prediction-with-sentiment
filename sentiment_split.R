@@ -289,4 +289,5 @@ avgo_data = avgo_data %>% mutate(sentiment_score = polarity * Followers) %>% sel
 a %>% filter(TICKER == "AVGO")
 avgo_data
 
-
+a_sentiment <- rbind(aal_data,aapl_data,adbe_data,adp_data,adsk_data,akam_data,alxn_data,
+      amat_data,amgn_data,amzn_data,atvi_data,avgo_data)
