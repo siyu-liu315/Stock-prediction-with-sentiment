@@ -1,6 +1,6 @@
 names(df1)
 try <- head(df1)
-View(try)
+
 
 library(tidyverse)
 library(tidyverse)
@@ -8,7 +8,7 @@ library(readxl)
 
 
 ## new packages for us
-# install.packages("rvest")
+#install.packages("rvest")
 library(rvest)
 # install.packages("tidytext")
 library(tidytext)
@@ -59,21 +59,26 @@ atvi$index <- seq.int(nrow(atvi))
 avgo <- filter(df1, grepl("AVGO", Symbols))
 avgo$index <- seq.int(nrow(avgo))
 
+
 ### runing sentiment for each company:
 ## aal
 aal_token = aal %>% 
   select(index, `Tweet content`) %>% 
-  unnest_tokens(token, `Tweet conte-nt`, token = "words",
+  unnest_tokens(token, `Tweet content`, token = "words",
                 strip_punct = T) %>% 
   anti_join(get_stopwords(),
             by = c("token" ="word")) %>% 
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_aal = aal_token %>% select(index, value) %>% 
+aal_data = aal_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(aal)
+aal_data$Followers = as.numeric(aal_data$Followers)
+aal_data = aal_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "AAL")
+
 
 ## aapl
 aapl_token = aapl %>% 
@@ -85,10 +90,13 @@ aapl_token = aapl %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_aapl = aapl_token %>% select(index, value) %>% 
+aapl_data = aapl_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(aapl)
+aapl_data$Followers = as.numeric(aapl_data$Followers)
+aapl_data = aapl_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "AAPL")
 
 ## adbe
 adbe_token = adbe %>% 
@@ -100,10 +108,13 @@ adbe_token = adbe %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_adbe = adbe_token %>% select(index, value) %>% 
+adbe_data = adbe_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(adbe)
+adbe_data$Followers = as.numeric(adbe_data$Followers)
+adbe_data = adbe_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "ADBE")
 
 ## adp
 adp_token = adp %>% 
@@ -115,12 +126,16 @@ adp_token = adp %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_adp = adp_token %>% select(index, value) %>% 
+adp_data = adp_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(adp)
+adp_data$Followers = as.numeric(adp_data$Followers)
+adp_data = adp_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "ADP")
 
 ### adsk
+
 adsk_token = adsk %>% 
   select(index, `Tweet content`) %>% 
   unnest_tokens(token, `Tweet content`, token = "words",
@@ -130,10 +145,13 @@ adsk_token = adsk %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_adsk = adsk_token %>% select(index, value) %>% 
+adsk_data = adsk_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(adsk)
+adsk_data$Followers = as.numeric(adsk_data$Followers)
+adsk_data = adsk_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "ADSK")
 
 
 ### akam
@@ -146,13 +164,13 @@ akam_token = akam %>%
   inner_join(get_sentiments("afinn"),
              by = c("token" ="word")) %>% print
 ### put the sentiment back to original data
-affin_akam = akam_token %>% select(index, value) %>% 
+akam_data = akam_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(akam)
-
-
-
+akam_data$Followers = as.numeric(akam_data$Followers)
+akam_data = akam_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "AKAM")
 
 ### alxn sentiment
 
@@ -169,6 +187,9 @@ alxn_data = alxn_token %>% select(index, value) %>%
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(alxn)
+alxn_data$Followers = as.numeric(alxn_data$Followers)
+alxn_data = alxn_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "ALXN")
 
 ### amat sentiment
 
@@ -185,7 +206,9 @@ amat_data = amat_token %>% select(index, value) %>%
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(amat)
-
+amat_data$Followers = as.numeric(amat_data$Followers)
+amat_data = amat_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "AMAT")
 ### amgn sentiment
 
 amgn_token = amgn %>% 
@@ -201,7 +224,9 @@ amgn_data = amgn_token %>% select(index, value) %>%
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(amgn)
-
+amgn_data$Followers = as.numeric(amgn_data$Followers)
+amgn_data = amgn_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "AMGN")
 
 ### amzn sentiment
 
@@ -218,6 +243,9 @@ amzn_data = amzn_token %>% select(index, value) %>%
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(amzn)
+amzn_data$Followers = as.numeric(amzn_data$Followers)
+amzn_data = amzn_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "AMZN")
 
 ### atvi sentiment
 
@@ -234,7 +262,9 @@ atvi_data = atvi_token %>% select(index, value) %>%
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
   inner_join(atvi)
-
+atvi_data$Followers = as.numeric(atvi_data$Followers)
+atvi_data = atvi_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "ATVI")
 
 ### avgo sentiment
 
@@ -250,11 +280,19 @@ avgo_token = avgo %>%
 avgo_data = avgo_token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
-  inner_join(avgo)
+  inner_join(avgo) 
+avgo_data$Followers = as.numeric(avgo_data$Followers)
+avgo_data = avgo_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+  group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "AVGO")
 
 
+a %>% filter(TICKER == "AVGO")
+avgo_data
+
+<<<<<<< HEAD
 
 
-
-
-
+=======
+a_sentiment <- rbind(aal_data,aapl_data,adbe_data,adp_data,adsk_data,akam_data,alxn_data,
+      amat_data,amgn_data,amzn_data,atvi_data,avgo_data)
+>>>>>>> 44ecb36b441dd670b15dc5a16980cd266d259211
