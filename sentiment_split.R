@@ -1,6 +1,6 @@
 names(df1)
 try <- head(df1)
-View(try)
+
 
 library(tidyverse)
 library(tidyverse)
@@ -64,7 +64,7 @@ avgo$index <- seq.int(nrow(avgo))
 ## aal
 aal_token = aal %>% 
   select(index, `Tweet content`) %>% 
-  unnest_tokens(token, `Tweet conte-nt`, token = "words",
+  unnest_tokens(token, `Tweet content`, token = "words",
                 strip_punct = T) %>% 
   anti_join(get_stopwords(),
             by = c("token" ="word")) %>% 
