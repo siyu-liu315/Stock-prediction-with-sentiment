@@ -5,44 +5,44 @@ library(readxl)
 library(tidytext)
 
 
-### target company for their tweets
-### can add more
-
-stock <- c('AAL','AAPL',"ADBE","ADP","ADSK","AKAM",
-           "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO")
-
-#prepare for the sentiment analysis
-df2 <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
-  separate(Symbols,into = paste('v',1:28))
-df3 <- df2 %>% pivot_longer(cols = `v 1`:`v 28`,
-                            names_to = 'pos',
-                            values_to = 'symbol',
-                            values_drop_na = T) %>% select(-pos) %>% 
-  filter(symbol %in% stock)
-
-df3$index <- seq.int(nrow(df3))
-
-### runing sentiment for each company:
-### use dictionary: 
-token = df3 %>% 
-  select(index, `Tweet content`) %>% 
-  unnest_tokens(token, `Tweet content`, token = "tweets",
-                strip_punct = T) %>% 
-  anti_join(get_stopwords(),
-            by = c("token" ="word")) %>% 
-  inner_join(get_sentiments("afinn"),
-             by = c("token" ="word")) %>% print
-
-token %>% select(index, value) %>% 
-  group_by(index) %>% 
-  summarise(polarity = mean(value)) %>% 
-  inner_join(df3)->sentiment_data
-
-sentiment_data$Followers <- as.numeric(sentiment_data$Followers)
-sentiment_data <- sentiment_data %>% mutate(sentiment_score = polarity * Followers/1000)
-
-group <- sentiment_data %>% group_by(symbol,Date) %>% 
-  summarise(sum = sum(sentiment_score,na.rm = T)) %>% ungroup()
+# ### target company for their tweets
+# ### can add more
+# 
+# stock <- c('AAL','AAPL',"ADBE","ADP","ADSK","AKAM",
+#            "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO")
+# 
+# #prepare for the sentiment analysis
+# df2 <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
+#   separate(Symbols,into = paste('v',1:28))
+# df3 <- df2 %>% pivot_longer(cols = `v 1`:`v 28`,
+#                             names_to = 'pos',
+#                             values_to = 'symbol',
+#                             values_drop_na = T) %>% select(-pos) %>% 
+#   filter(symbol %in% stock)
+# 
+# df3$index <- seq.int(nrow(df3))
+# 
+# ### runing sentiment for each company:
+# ### use dictionary: 
+# token = df3 %>% 
+#   select(index, `Tweet content`) %>% 
+#   unnest_tokens(token, `Tweet content`, token = "tweets",
+#                 strip_punct = T) %>% 
+#   anti_join(get_stopwords(),
+#             by = c("token" ="word")) %>% 
+#   inner_join(get_sentiments("afinn"),
+#              by = c("token" ="word")) %>% print
+# 
+# token %>% select(index, value) %>% 
+#   group_by(index) %>% 
+#   summarise(polarity = mean(value)) %>% 
+#   inner_join(df3)->sentiment_data
+# 
+# sentiment_data$Followers <- as.numeric(sentiment_data$Followers)
+# sentiment_data <- sentiment_data %>% mutate(sentiment_score = polarity * Followers/1000)
+# 
+# group <- sentiment_data %>% group_by(symbol,Date) %>% 
+#   summarise(sum = sum(sentiment_score,na.rm = T)) %>% ungroup()
 
 ### read files include finance data
 a <- read.csv('a_group.csv')

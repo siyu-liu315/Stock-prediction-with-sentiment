@@ -5,7 +5,7 @@ library(tidytext)
 
 ### split the rtweet data by 
 stock <- c('AAL','AAPL',"ADBE","ADP","ADSK","AKAM",
-           "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO")
+           "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO",'')
 
 #prepare for the sentiment analysis
 df2 <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
