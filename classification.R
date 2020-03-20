@@ -1,5 +1,6 @@
 library(tidyverse)
 library(caret)
+library(randomForest)
 
 a <- read.csv('a_group.csv')
 a$date <- as.Date(as.character(a$date),format = '%m/%d/%Y')
@@ -9,11 +10,11 @@ a_finance <- a %>% select(date, TICKER,PRC,VOL) %>%
          buy = as.numeric(pct > 0 ))%>%
            filter(date >= as.Date('2016-03-10') & date <= as.Date('2016-06-15'))
 
-names(a_sentiment) = c('date','sentiment_score','TICKER')
-a_sentiment$date = as.Date(a_sentiment$date)
+names(group) = c('TICKER','date','sentiment_score')
+group$date = as.Date(group$date)
 a_finance$buy <- as.factor(a_finance$buy)
 
-df_cla <- left_join(a_finance,a_sentiment,by =c('date','TICKER'))             
+df_cla <- left_join(a_finance,group,by =c('date','TICKER'))             
 df_cla$sentiment_score[is.na(df_cla$sentiment_score)] <-0 
 
 df_1 <- df_cla %>% select(date,TICKER,pct,buy,sentiment_score) %>% 
