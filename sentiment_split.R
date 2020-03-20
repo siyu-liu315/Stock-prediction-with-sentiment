@@ -340,3 +340,28 @@ group <- sentiment_data %>% group_by(symbol,Date) %>%
 # 
 # a_sentiment <- rbind(aal_data,aapl_data,adbe_data,adp_data,adsk_data,akam_data,alxn_data,
 #       amat_data,amgn_data,amzn_data,atvi_data,avgo_data)
+### avgo sentiment
+
+# avgo_token = avgo %>% 
+#   select(index, `Tweet content`) %>% 
+#   unnest_tokens(token, `Tweet content`, token = "words",
+#                 strip_punct = T) %>% 
+#   anti_join(get_stopwords(),
+#             by = c("token" ="word")) %>% 
+#   inner_join(get_sentiments("afinn"),
+#              by = c("token" ="word")) %>% print
+# ### put the sentiment back to original data
+# avgo_data = avgo_token %>% select(index, value) %>% 
+#   group_by(index) %>% 
+#   summarise(polarity = mean(value)) %>% 
+#   inner_join(avgo) 
+# avgo_data$Followers = as.numeric(avgo_data$Followers)
+# avgo_data = avgo_data %>% mutate(sentiment_score = polarity * Followers) %>% select(Date,sentiment_score) %>% 
+#   group_by(Date) %>% summarise(sentiment_score = mean(sentiment_score)) %>% mutate(symbols = "AVGO")
+# 
+# 
+# a %>% filter(TICKER == "AVGO")
+# avgo_data
+# 
+# a_sentiment <- rbind(aal_data,aapl_data,adbe_data,adp_data,adsk_data,akam_data,alxn_data,
+#       amat_data,amgn_data,amzn_data,atvi_data,avgo_data)

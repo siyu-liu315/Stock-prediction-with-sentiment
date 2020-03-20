@@ -10,8 +10,23 @@ a_finance <- a %>% select(date, TICKER,PRC,VOL) %>%
          buy = as.numeric(pct > 0 ))%>%
            filter(date >= as.Date('2016-03-10') & date <= as.Date('2016-06-15'))
 
+
 names(group) = c('TICKER','date','sentiment_score')
 group$date = as.Date(group$date)
+
+## EDA
+View(a)
+ggplot(data = a, aes(x = as.factor(date), y = pct, fill = TICKER)) +
+  geom_col(position = "dodge")+
+  facet_wrap(~TICKER) +
+  labs(title = "Percent Change of A-group Stock Price in Selected Period", x = "Date", y ="Percent Change")
+             
+
+names(a_sentiment) = c('date','sentiment_score','TICKER')
+a_sentiment$date = as.Date(a_sentiment$date)
+
+
+
 a_finance$buy <- as.factor(a_finance$buy)
 
 df_cla <- left_join(a_finance,group,by =c('date','TICKER'))             
@@ -56,3 +71,4 @@ pred = predict.gbm(object = fit_boost,
 
 confusionMatrix(round(pred),test$buy)
 confusionMatrix(yhat.train.tree,train$buy)
+
