@@ -1,33 +1,13 @@
-names(df1)
-try <- head(df1)
-
-
 library(tidyverse)
 library(readxl)
 library(tidytext)
 
-## new packages for us
-#install.packages("rvest")
-library(rvest)
-# install.packages("tidytext")
-library(tidytext)
-# install.packages("wordcloud)
-library(wordcloud)
-# install.packages("quanteda")
-library(quanteda)
-# devtools::install_github("quanteda/quanteda.corpora")
-library(quanteda.corpora)
-
-names(df1)
 
 ### split the rtweet data by 
-
-
 stock <- c('AAL','AAPL',"ADBE","ADP","ADSK","AKAM",
            "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO")
 
-#for i in stock:
-
+#prepare for the sentiment analysis
 df2 <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
     separate(Symbols,into = paste('v',1:28))
 df3 <- df2 %>% pivot_longer(cols = `v 1`:`v 28`,
@@ -58,9 +38,6 @@ sentiment_data <- sentiment_data %>% mutate(sentiment_score = polarity * Followe
 
 group <- sentiment_data %>% group_by(symbol,Date) %>% 
   summarise(sum = sum(sentiment_score,na.rm = T)) %>% ungroup()
-
-
-
 
 
 ### put the sentiment back to original data
