@@ -55,7 +55,7 @@ a_finance <- a %>% select(date, TICKER,PRC,VOL) %>%
 
 ## EDA
 View(a)
-ggplot(data = a, aes(x = as.factor(date), y = pct, fill = TICKER)) +
+ggplot(data = a_finance, aes(x = as.factor(date), y = pct, fill = TICKER)) +
   geom_col(position = "dodge")+
   facet_wrap(~TICKER) +
   labs(title = "Percent Change of A-group Stock Price in Selected Period", x = "Date", y ="Percent Change")
