@@ -11,7 +11,7 @@ data <- read_csv("portfolio_data.csv")
 data <- data[-c(1)]
 data <- data %>% select(X1_1, everything())
 # Deleting any prices from around the Corona Virus
-data <- data[-c(150:505)]
+data <- data[-c(200:505)]
 data <- data[-c(2:130)]
 
 
@@ -34,7 +34,6 @@ test_real <- as.vector(test[[c(1)]])
 results <- tibble(x = 0, model = 0, mse = 0)
 
 
-
 for (x in 2:ncol(train)) {
   y <- train[c(1:x)]
   y_test <- test[c(2:x)]
@@ -54,12 +53,11 @@ for (x in 2:ncol(train)) {
   ## Random Forest
   y <- clean_names(y)
   y_test <- clean_names(y_test)
-  rf <- randomForest(x10_2_2019 ~ ., y, ntree = 2500, do.trace = F)
+  rf <- randomForest(x10_2_2019 ~ ., y, ntree = 250, do.trace = F)
   fit_predict <- predict(rf, y_test)
   mse <- mean_squared_error(test_real, fit_predict)
   results <- results %>% add_row(x = x, model = "RForest", mse = mse)
  
-  
   ## Boosting
   # boost <- gbm(x10_2_2019 ~ .,
   #                       data = y,
@@ -93,4 +91,61 @@ for (x in 3:ncol(train)){
 }
 
 results <- results[order(results$mse, decreasing = F),] 
-View(results)
+results[2,]
+
+## Creating the Final Model
+#### The Best performing model from above was simple linear regression with a window of 54
+final_model_data <- model_data[1:55]
+colnames(final_model_data) <- c(1:55)
+final_model <- lm(final_model_data$`1` ~ ., data = final_model_data)
+
+## Preparing The Portfolio Data
+port_data <- port_data[1:56]
+tickers <- port_data[c(1)]
+port_data <- port_data[-c(1)]
+colnames(port_data) <- c(1:55)
+port_data <- cbind(tickers, port_data)
+
+
+## Predicting For Portfolio Data
+port_predictions <- predict(final_model, port_data)
+port_data <- cbind(port_predictions, port_data)
+port_data <- port_data %>%  mutate(spread = (port_predictions - port_data$`2`))
+port_data <- port_data[order(port_data$spread, decreasing = T),] 
+port_data <- port_data %>% mutate(actual_spread = (port_data$`1` - port_data$`2`))
+
+### Winning Basket
+winning_basket <- port_data[1:5,]
+
+### Random Baskets For Comparision 
+rb1 <- port_data %>% sample_n(5)
+set.seed(2)
+rb2 <- port_data %>% sample_n(5)
+set.seed(3)
+rb3 <- port_data %>% sample_n(5)
+set.seed(4)
+rb4 <- port_data %>% sample_n(5)
+set.seed(5)
+rb5 <- port_data %>% sample_n(5)
+set.seed(6)
+rb6 <- port_data %>% sample_n(5)
+set.seed(7)
+rb7 <- port_data %>% sample_n(5)
+set.seed(8)
+rb8 <- port_data %>% sample_n(5)
+set.seed(9)
+rb9 <- port_data %>% sample_n(5)
+
+
+
+### Gains/Losses
+sum(winning_basket$actual_spread)
+sum(rb1$actual_spread)
+sum(rb2$actual_spread)
+sum(rb3$actual_spread)
+sum(rb4$actual_spread)
+sum(rb5$actual_spread)
+sum(rb6$actual_spread)
+sum(rb7$actual_spread)
+sum(rb8$actual_spread)
+sum(rb9$actual_spread)
