@@ -149,3 +149,5 @@ sum(rb6$actual_spread)
 sum(rb7$actual_spread)
 sum(rb8$actual_spread)
 sum(rb9$actual_spread)
+
+mean(port_data$actual_spread)
