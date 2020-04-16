@@ -116,11 +116,38 @@ df_1 <- df_cla %>% select(date,TICKER,pct,buy,sentiment_score) %>%
   arrange(TICKER) %>% mutate(lag_sen = lag(sentiment_score),
                              lag_pct = lag(pct))
 df_class <- df_1 %>% filter(date != '2016-03-10')
+df_class <-  df_class %>% select(date,buy,lag_pct,lag_sen) 
 
+
+##function return overall acurracy
+get_accuracy<- function(train, test){
+  f1 <- as.formula(buy ~ .)
+  trees <- randomForest(f1, train,
+                        ntree=200,
+                        do.trace=F)
+  yhat.test.tree <- predict(trees, test)
+  yhat.train.tree <- predict(trees, train)
+  a <- confusionMatrix(yhat.test.tree,test$buy)
+  return(a$overall)
+}
 
 ### model
-train <- df_class %>% filter(date < as.Date('2016-05-31'))%>% select(buy,lag_pct,lag_sen)
-test <- df_class %>% filter(date >= as.Date('2016-05-31'))%>% select(buy,lag_pct,lag_sen)
+train <- df_class %>% filter(date < as.Date('2016-05-31')) %>% select(-date)
+test <- df_class %>% filter(date >= as.Date('2016-05-31')) %>% select(-date)
+
+lst <- list()
+
+for(n in seq_len(20)){
+  column_name = paste('lag',n,sep = '_')
+  df_class[[column_name]] <- lag(df_class$lag_sen,n)
+  date_remove <- df_class$date[is.na(df_class[[column_name]])]
+  df_class <- df_class %>% filter(date != date_remove)
+  train <- df_class %>% filter(date < as.Date('2016-05-31')) %>% select(-date)
+  test <- df_class %>% filter(date >= as.Date('2016-05-31')) %>% select(-date)
+  lst[n] <- get_accuracy(train, test)
+}
+###seems windows of 7 would have highest accuracy.
+
 
 #train_x <- train %>% select(lag_pct,lag_sen)
 #train_y <- train$buy
@@ -129,14 +156,7 @@ test <- df_class %>% filter(date >= as.Date('2016-05-31'))%>% select(buy,lag_pct
 #test_y <- test$buy
 
 ### random forest
-f1 <- as.formula(buy ~ .)
-trees <- randomForest(f1, train,
-                            ntree=200,
-                            do.trace=F)
-yhat.test.tree <- predict(trees, test)
-yhat.train.tree <- predict(trees, train)
-confusionMatrix(yhat.test.tree,test$buy)
-confusionMatrix(yhat.train.tree,train$buy)
+
 
 
 ### boosting 
