@@ -8,17 +8,20 @@ output: pdf_document
 ```{r}
 library(tidyverse)
 library(rvest)
-# install.packages("tidytext")
 library(tidytext)
-# install.packages("wordcloud)
 library(wordcloud)
-# install.packages("quanteda")
 library(quanteda)
-# devtools::install_github("quanteda/quanteda.corpora")
 library(quanteda.corpora)
 library(openair)
+library(lubridate)
+library(prophet)
+library(corrplot)
+library(skimr)
 
-sp500 <- read.csv(file = "timeseries_analysis/S&P500Index.csv")
+sp500 <- read.csv('timeseries_analysis/S&P500Index.csv')
+nyse <- read.csv('timeseries_analysis/NYSE.csv')
+nasdaq <- read.csv('timeseries_analysis/NASDAQ.csv')
+DJ <- read.csv('timeseries_analysis/NASDAQ.csv')
 ```
 
 ```{r}
@@ -34,16 +37,17 @@ setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
 
 tweets <- searchTwitter('S&P500', n = 1368, lang = 'en') # 1368 is max the api can return
 tweetsdf <- twListToDF(tweets)
+tweetsold <- read.csv('sentiment_analysis/tweets_feb_14_pull.csv')
+x <- rbind(tweetsdf, tweetsold)
+x <- x %>% filter(isRetweet == 'TRUE')
+write.csv(x, file = 'sentiment_analysis/tweets')
+
 ```
 ```{r}
-# Some EDA
-
 sp <- transform(sp500, date = as.Date(as.character(sp500$caldt), "%Y%m%d"))
-View(sp)
 
-### Overview
 ggplot(data = sp, aes(x = date, y = spindx)) +
   geom_line(color = "#FC4E07") +
   labs(title = "1990 - 2019 S&P500 Price")
-```
 
+```
