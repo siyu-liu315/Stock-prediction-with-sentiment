@@ -49,7 +49,7 @@ library(gbm)
 ## sentiment analysis
 ### split the rtweet data by 
 stock <- c('AAL','AAPL',"ADBE","ADP","ADSK","AKAM",
-           "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO",'')
+           "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO")
 
 #prepare for the sentiment analysis
 df2 <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
@@ -128,6 +128,7 @@ get_accuracy<- function(train, test){
   yhat.test.tree <- predict(trees, test)
   yhat.train.tree <- predict(trees, train)
   a <- confusionMatrix(yhat.test.tree,test$buy)
+  print(a)
   return(a$overall)
 }
 
@@ -144,9 +145,25 @@ for(n in seq_len(20)){
   df_class <- df_class %>% filter(date != date_remove)
   train <- df_class %>% filter(date < as.Date('2016-05-31')) %>% select(-date)
   test <- df_class %>% filter(date >= as.Date('2016-05-31')) %>% select(-date)
+  print(nrow(train))
+  print(nrow(test))
   lst[n] <- get_accuracy(train, test)
 }
+
+
+
 ###seems windows of 7 would have highest accuracy.
+
+df_result <- as.data.frame(1:20)
+df_result$accuracy = lst
+df_result$accuracy = as.numeric(df_result$accuracy)
+names(df_result)[1] <- 'windows'
+
+
+ggplot(df_result,aes(x = windows, y = accuracy))+
+  geom_line()+
+  geom_hline(yintercept = 0.5,color = 'red')+
+  ggtitle('Classification Accuracy on Diffrent Windows')
 
 
 #train_x <- train %>% select(lag_pct,lag_sen)
