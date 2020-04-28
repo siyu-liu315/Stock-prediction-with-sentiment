@@ -5,77 +5,56 @@ library(readxl)
 library(tidytext)
 library(gbm)
 
-# ### target company for their tweets
-# ### can add more
-# 
-# stock <- c('AAL','AAPL',"ADBE","ADP","ADSK","AKAM",
-#            "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO")
-# 
-# #prepare for the sentiment analysis
-# df2 <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
-#   separate(Symbols,into = paste('v',1:28))
-# df3 <- df2 %>% pivot_longer(cols = `v 1`:`v 28`,
-#                             names_to = 'pos',
-#                             values_to = 'symbol',
-#                             values_drop_na = T) %>% select(-pos) %>% 
-#   filter(symbol %in% stock)
-# 
-# df3$index <- seq.int(nrow(df3))
-# 
-# ### runing sentiment for each company:
-# ### use dictionary: 
-# token = df3 %>% 
-#   select(index, `Tweet content`) %>% 
-#   unnest_tokens(token, `Tweet content`, token = "tweets",
-#                 strip_punct = T) %>% 
-#   anti_join(get_stopwords(),
-#             by = c("token" ="word")) %>% 
-#   inner_join(get_sentiments("afinn"),
-#              by = c("token" ="word")) %>% print
-# 
-# token %>% select(index, value) %>% 
-#   group_by(index) %>% 
-#   summarise(polarity = mean(value)) %>% 
-#   inner_join(df3)->sentiment_data
-# 
-# sentiment_data$Followers <- as.numeric(sentiment_data$Followers)
-# sentiment_data <- sentiment_data %>% mutate(sentiment_score = polarity * Followers/1000)
-# 
-# group <- sentiment_data %>% group_by(symbol,Date) %>% 
-#   summarise(sum = sum(sentiment_score,na.rm = T)) %>% ungroup()
-
-
-
-## sentiment analysis
-### split the rtweet data by 
-stock <- c('AAL','AAPL',"ADBE","ADP","ADSK","AKAM",
-           "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO")
+stock <- c("AAL","AAPL","ADBE","ADP","ADSK","AKAM",
+           "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO","BBBY",
+           "BIDU","BMRN","CA","CELG","CERN","CHKP","CHTR","CMCSA","COST","CSCO",
+           "CSX","CTRP","CTSH","DISCA","DISCK","DISH","DLTR","EA","EBAY","ENDP","ESRX",
+           "EXPE","FAST","FB","FISV","FOX","FOXA","GILD","GOOG","GOOGL","HSIC","ILMN",
+           "INCT","INCY","INTU","ISRG","JD","KHC","LBTYA","LBTYK","LlTC","LMCA","LMCK",
+           "LRCX","LVNTA","MAR","MAT","MDLZ","MNST","MSFT","MU","MXIM","MYL","NCLH",
+           "NFLX","NTAP","NTES","NVDA","NXPI","ORLY","PAYX","PCAR","PCLN","PYPL","QCOM",
+           "QVCA","REGN","ROST","SBAC","SBUX","SNDK","SRCL","STX","SWKS","SYMC","TMUS",
+           "TRIP","TSCO","TSLA","TXN","ULTA","VIAB","VOD","VRSK","VRTX","WBA","WDC","WFM","XLNX","YHOO")
 
 #prepare for the sentiment analysis
-df2 <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
+temp <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
   separate(Symbols,into = paste('v',1:28))
-df3 <- df2 %>% pivot_longer(cols = `v 1`:`v 28`,
+df1_clean <- temp %>% pivot_longer(cols = `v 1`:`v 28`,
                             names_to = 'pos',
                             values_to = 'symbol',
                             values_drop_na = T) %>% select(-pos) %>% 
+filter(symbol %in% stock)
+
+temp2 <- df2 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
+  separate(Symbols,into = paste('v',1:28))
+df2_clean <- temp2 %>% pivot_longer(cols = `v 1`:`v 28`,
+                                   names_to = 'pos',
+                                   values_to = 'symbol',
+                                   values_drop_na = T) %>% select(-pos) %>% 
   filter(symbol %in% stock)
 
-df3$index <- seq.int(nrow(df3))
+df_content <- rbind(df1_clean,df2_clean)
+# df_content <- unique(df_content)
+
+df_content$index <- seq.int(nrow(df_content))
+
 
 ### runing sentiment for each company:
-token = df3 %>% 
+token = df_content %>% 
   select(index, `Tweet content`) %>% 
   unnest_tokens(token, `Tweet content`, token = "tweets",
-                strip_punct = T) %>% 
+                strip_punct = T) 
+
+token <- token%>% 
   anti_join(get_stopwords(),
             by = c("token" ="word")) %>% 
   inner_join(get_sentiments("afinn"),
-             by = c("token" ="word")) %>% print
+             by = c("token" ="word"))
 
 token %>% select(index, value) %>% 
   group_by(index) %>% 
   summarise(polarity = mean(value)) %>% 
-  inner_join(df3)->sentiment_data
+  inner_join(df_content)->sentiment_data
 
 sentiment_data$Followers <- as.numeric(sentiment_data$Followers)
 sentiment_data <- sentiment_data %>% mutate(sentiment_score = polarity * Followers/1000)
@@ -86,35 +65,39 @@ group <- sentiment_data %>% group_by(symbol,Date) %>%
 
 
 ### read files include finance data
-a <- read.csv('a_group.csv')
-a$date <- as.Date(as.character(a$date),format = '%m/%d/%Y')
+stock_price <- read.csv('stock_price.csv')
+stock_price$datadate <- as.Date(as.character(stock_price$datadate),format = '%m/%d/%Y')
+names(stock_price) = c('gvkey','iid','date','tic','vol','price')
 
-a_finance <- a %>% select(date, TICKER,PRC,VOL) %>% 
-  mutate(pct = (PRC-lag(PRC))/lag(PRC),
-         buy = as.numeric(pct > 0 ))%>%
+
+stock <- stock_price %>% select(date, tic,price,vol) %>%
+  arrange(tic) %>% 
+  mutate(pct = (price-lag(price))/lag(price),
+         buy = as.numeric(pct < 0 ))%>%
            filter(date >= as.Date('2016-03-10') & date <= as.Date('2016-06-15'))
 
-# EDA
-View(a)
-ggplot(data = a_finance, aes(x = as.factor(date), y = pct, fill = TICKER)) +
-  geom_col(position = "dodge")+
-  facet_wrap(~TICKER) +
-  labs(title = "Percent Change of A-group Stock Price in Selected Period", x = "Date", y ="Percent Change")
+# # EDA
+# View(a)
+# ggplot(data = a_finance, aes(x = as.factor(date), y = pct, fill = TICKER)) +
+#   geom_col(position = "dodge")+
+#   facet_wrap(~TICKER) +
+#   labs(title = "Percent Change of A-group Stock Price in Selected Period", x = "Date", y ="Percent Change")
 
 
 ##combind finance data with sentiment data
 
-names(group) = c('TICKER','date','sentiment_score')
+names(group) = c('tic','date','sentiment_score')
 group$date = as.Date(group$date)
-a_finance$buy <- as.factor(a_finance$buy)
-df_cla <- left_join(a_finance,group,by =c('date','TICKER'))
+stock$buy <- as.factor(stock$buy)
+df_cla <- left_join(stock,group,by =c('date','tic'))
 df_cla$sentiment_score[is.na(df_cla$sentiment_score)] <-0
 
 
 ### lag sentiment data
-df_1 <- df_cla %>% select(date,TICKER,pct,buy,sentiment_score) %>% 
-  arrange(TICKER) %>% mutate(lag_sen = lag(sentiment_score),
+df_1 <- df_cla %>% select(date,tic,pct,buy,sentiment_score) %>% 
+  arrange(tic) %>% mutate(lag_sen = lag(sentiment_score),
                              lag_pct = lag(pct))
+
 df_class <- df_1 %>% filter(date != '2016-03-10')
 df_class <-  df_class %>% select(date,buy,lag_pct,lag_sen) 
 
@@ -133,14 +116,14 @@ get_accuracy<- function(train, test){
 }
 
 ### model
-train <- df_class %>% filter(date < as.Date('2016-05-31')) %>% select(-date)
-test <- df_class %>% filter(date >= as.Date('2016-05-31')) %>% select(-date)
+# train <- df_class %>% filter(date < as.Date('2016-05-31')) %>% select(-date)
+# test <- df_class %>% filter(date >= as.Date('2016-05-31')) %>% select(-date)
 
 lst <- list()
 
-for(n in seq_len(20)){
-  column_name = paste('lag',n,sep = '_')
-  df_class[[column_name]] <- lag(df_class$lag_sen,n)
+for(n in seq_len(19)){
+  column_name = paste('lag',n+1,sep = '_')
+  df_class[[column_name]] <- lag(df_class$lag_sen,n+1)
   date_remove <- df_class$date[is.na(df_class[[column_name]])]
   df_class <- df_class %>% filter(date != date_remove)
   train <- df_class %>% filter(date < as.Date('2016-05-31')) %>% select(-date)
