@@ -22,7 +22,7 @@ temp <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>%
 df1_clean <- temp %>% pivot_longer(cols = `v 1`:`v 28`,
                             names_to = 'pos',
                             values_to = 'symbol',
-                            values_drop_na = T) %>% select(-pos) %>% 
+                            values_adrop_na = T) %>% select(-pos) %>% 
 filter(symbol %in% stock)
 
 temp2 <- df2 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
