@@ -6,6 +6,7 @@ library(gbm)
 library(rpart)
 library(randomForest)
 library(janitor)
+library(scales)
 
 data <- read_csv("portfolio_data.csv")
 data <- data[-c(1)]
@@ -58,14 +59,14 @@ for (x in 2:ncol(train)) {
   mse <- mean_squared_error(test_real, fit_predict)
   results <- results %>% add_row(x = x, model = "RForest", mse = mse)
  
-  ## Boosting
-  # boost <- gbm(x10_2_2019 ~ .,
-  #                       data = y,
-  #                       n.trees = 250,
-  #                       interaction.depth = 2,
-  #                       shrinkage = 0.001)
-  # fit_predict <- predict(boost, y_test)
-  # mse <- mean_squared_error(test_real, fit_predict)
+  # Boosting
+  boost <- gbm(x10_2_2019 ~ . , 
+               data = y,
+               n.trees = 250,
+               shrinkage = .001)
+  fit_predict <- predict.gbm(boost, y_test, 250)
+  mse <- mean_squared_error(test_real, fit_predict)
+  results <- results %>% add_row(x = x, model = "Boost", mse = mse)
 }
 
 for (x in 3:ncol(train)){
@@ -106,7 +107,6 @@ port_data <- port_data[-c(1)]
 colnames(port_data) <- c(1:55)
 port_data <- cbind(tickers, port_data)
 
-
 ## Predicting For Portfolio Data
 port_predictions <- predict(final_model, port_data)
 port_data <- cbind(port_predictions, port_data)
@@ -135,19 +135,63 @@ set.seed(8)
 rb8 <- port_data %>% sample_n(5)
 set.seed(9)
 rb9 <- port_data %>% sample_n(5)
+set.seed(10)
+rb10 <- port_data %>% sample_n(5)
 
 
 
 ### Gains/Losses
-sum(winning_basket$actual_spread)
-sum(rb1$actual_spread)
-sum(rb2$actual_spread)
-sum(rb3$actual_spread)
-sum(rb4$actual_spread)
-sum(rb5$actual_spread)
-sum(rb6$actual_spread)
-sum(rb7$actual_spread)
-sum(rb8$actual_spread)
-sum(rb9$actual_spread)
+Gains_Losses <- c(sum(winning_basket$actual_spread),
+                   sum(rb1$actual_spread),
+                   sum(rb2$actual_spread),
+                   sum(rb3$actual_spread),
+                   sum(rb4$actual_spread),
+                   sum(rb5$actual_spread),
+                   sum(rb6$actual_spread),
+                   sum(rb7$actual_spread),
+                   sum(rb8$actual_spread),
+                   sum(rb9$actual_spread),
+                   sum(rb10$actual_spread))
 
-mean(port_data$actual_spread)
+### Average Gains/Losses
+Average <- c(sum(winning_basket$actual_spread)/5,
+                  sum(rb1$actual_spread)/5,
+                  sum(rb2$actual_spread)/5,
+                  sum(rb3$actual_spread)/5,
+                  sum(rb4$actual_spread)/5,
+                  sum(rb5$actual_spread)/5,
+                  sum(rb6$actual_spread)/5,
+                  sum(rb7$actual_spread)/5,
+                  sum(rb8$actual_spread)/5,
+                  sum(rb9$actual_spread)/5,
+                  sum(rb10$actual_spread)/5)
+
+### Portfolio Names
+Name <- c('Winner',
+               'Basket1',
+               'Basket2',
+               'Basket3',
+               'Basket4',
+               'Basket5',
+               'Basket6',
+               'Basket7',
+               'Basket8',
+               'Basket9',
+               'Basket10')
+
+Portfolio <- data.frame(Name, Gains_Losses, Average)
+Portfolio <- Portfolio %>%  mutate(Beat_Winner = if_else(Gains_Losses > -15, "Yes", "No"))
+Portfolio <- Portfolio %>%  mutate(Beat_Aggregate = if_else(Average > mean(port_data$actual_spread), "Yes", "No"))
+
+### Doing Some Analysis
+Analysis <- Portfolio[2:11,]
+Analysis <- Analysis %>%  mutate(Beat_Winner = if_else(Beat_Winner == "Yes", 1, 0))
+Analysis <- Analysis %>%  mutate(Beat_Aggregate = if_else(Beat_Aggregate == "Yes", 1, 0))
+
+### Amount That Beat The Winning Portfolio
+percent(mean(Analysis$Beat_Winner))
+
+### Amount That Beat The Aggregate
+percent(mean(Analysis$Beat_Aggregate))
+View(Portfolio)
+
