@@ -8,14 +8,12 @@ library(randomForest)
 library(janitor)
 library(scales)
 
-data <- read_csv("portfolio_data.csv")
-data <- data[-c(1)]
-data <- data %>% select(X1_1, everything())
-# Deleting any prices from around the Corona Virus
-data <- data[-c(200:505)]
-data <- data[-c(2:130)]
+data <- read_csv("portfolio/portfolio_data.csv")
+data[2:104] <- scale(data[2:104])
+data <- as.data.frame(t(data))
+data <- na.omit(data)
 
-
+View(data)
 ## Split data for portfolio and for selecting model dropping ticker symbol and the tag 
 smp_size <- floor(0.5 * nrow(data))
 train_ind <- sample(seq_len(nrow(data)), size = smp_size)
@@ -40,7 +38,7 @@ for (x in 2:ncol(train)) {
   y_test <- test[c(2:x)]
   
   ## Linear
-  fit <- lm(y$`10/2/2019` ~ ., data = y)
+  fit <- lm(y$ ~ ., data = y)
   fit_predict <- predict(fit, y_test)
   mse <- mean_squared_error(test_real, fit_predict)
   results <- results %>% add_row(x = x, model = "linear", mse = mse)
