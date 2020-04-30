@@ -31,20 +31,23 @@ train <- model_data[train_ind, ]
 test <- model_data[-train_ind, ]
 test_real <- as.vector(test[[c(1)]])
 
+results <-  tibble(
+    x = NA,
+    model = NA,
+    mse = NA)
 
-
-for (x in 2:ncol(train)) {
+for (x in 2:ncol(train)){
   y <- train[c(1:x)]
   y_test <- test[c(2:x)]
   
   ## Linear
-  fit <- lm(y$x6_15_2016 ~ ., data = y)
+  fit <- lm(y$`6/15/2016` ~ ., data = y)
   fit_predict <- predict(fit, y_test)
   mse <- mean_squared_error(test_real, fit_predict)
   results <- results %>% add_row(x = x, model = "linear", mse = mse)
 
   ## Decision Tree
-  tree <- rpart(y$x6_15_2016 ~ ., y)
+  tree <- rpart(y$`6/15/2016` ~ ., y)
   fit_predict <- predict(tree, y_test)
   mse <- mean_squared_error(test_real, fit_predict)
   results <- results %>% add_row(x = x, model = "Decision Tree", mse = mse)
@@ -57,14 +60,14 @@ for (x in 2:ncol(train)) {
   mse <- mean_squared_error(test_real, fit_predict)
   results <- results %>% add_row(x = x, model = "RForest", mse = mse)
  
-  # Boosting
-  boost <- gbm(x6_15_2016 ~ . , 
-               data = y,
-               n.trees = 250,
-               shrinkage = .001)
-  fit_predict <- predict.gbm(boost, y_test, 250)
-  mse <- mean_squared_error(test_real, fit_predict)
-  results <- results %>% add_row(x = x, model = "Boost", mse = mse)
+  # # Boosting
+  # boost <- gbm(x6_15_2016 ~ . , 
+  #              data = y,
+  #              n.trees = 250,
+  #              shrinkage = .001)
+  # fit_predict <- predict.gbm(boost, y_test, 250)
+  # mse <- mean_squared_error(test_real, fit_predict)
+  # results <- results %>% add_row(x = x, model = "Boost", mse = mse)
 }
 
 for (x in 3:ncol(train)){
@@ -90,27 +93,26 @@ for (x in 3:ncol(train)){
 }
 
 results <- results[order(results$mse, decreasing = F),] 
-results[2,]
+results[1,]
 
 ## Creating the Final Model
 #### The Best performing model from above was simple linear regression with a window of 54
-final_model_data <- model_data[1:55]
-colnames(final_model_data) <- c(1:55)
+final_model_data <- model_data[2:9]
+colnames(final_model_data) <- c(1:8)
 final_model <- lm(final_model_data$`1` ~ ., data = final_model_data)
 
 ## Preparing The Portfolio Data
-port_data <- port_data[1:56]
-tickers <- port_data[c(1)]
+port_data <- port_data[1:9]
+real_port <- port_data[c(1)]
 port_data <- port_data[-c(1)]
-colnames(port_data) <- c(1:55)
-port_data <- cbind(tickers, port_data)
+colnames(port_data) <- c(1:8)
 
 ## Predicting For Portfolio Data
 port_predictions <- predict(final_model, port_data)
-port_data <- cbind(port_predictions, port_data)
-port_data <- port_data %>%  mutate(spread = (port_predictions - port_data$`2`))
+port_data <- cbind(port_predictions, real_port, port_data)
+port_data <- port_data %>%  mutate(spread = (port_predictions - port_data$`1`))
 port_data <- port_data[order(port_data$spread, decreasing = T),] 
-port_data <- port_data %>% mutate(actual_spread = (port_data$`1` - port_data$`2`))
+port_data <- port_data %>% mutate(actual_spread = (port_data$`1` - port_data$`6/15/2016`))
 
 ### Winning Basket
 winning_basket <- port_data[1:5,]
@@ -178,7 +180,7 @@ Name <- c('Winner',
                'Basket10')
 
 Portfolio <- data.frame(Name, Gains_Losses, Average)
-Portfolio <- Portfolio %>%  mutate(Beat_Winner = if_else(Gains_Losses > -15, "Yes", "No"))
+Portfolio <- Portfolio %>%  mutate(Beat_Winner = if_else(Gains_Losses > Portfolio[1,2], "Yes", "No"))
 Portfolio <- Portfolio %>%  mutate(Beat_Aggregate = if_else(Average > mean(port_data$actual_spread), "Yes", "No"))
 
 ### Doing Some Analysis
@@ -191,5 +193,5 @@ percent(mean(Analysis$Beat_Winner))
 
 ### Amount That Beat The Aggregate
 percent(mean(Analysis$Beat_Aggregate))
-View(Portfolio)
+
 
