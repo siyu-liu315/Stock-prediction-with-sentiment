@@ -21,16 +21,14 @@ temp <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>%
   separate(Symbols,into = paste('v',1:28))
 df1_clean <- temp %>% pivot_longer(cols = `v 1`:`v 28`,
                             names_to = 'pos',
-                            values_to = 'symbol',
-                            values_adrop_na = T) %>% select(-pos) %>% 
+                            values_to = 'symbol') %>% select(-pos) %>% 
 filter(symbol %in% stock)
 
 temp2 <- df2 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
   separate(Symbols,into = paste('v',1:28))
 df2_clean <- temp2 %>% pivot_longer(cols = `v 1`:`v 28`,
                                    names_to = 'pos',
-                                   values_to = 'symbol',
-                                   values_drop_na = T) %>% select(-pos) %>% 
+                                   values_to = 'symbol') %>% select(-pos) %>% 
   filter(symbol %in% stock)
 
 df_content <- rbind(df1_clean,df2_clean)

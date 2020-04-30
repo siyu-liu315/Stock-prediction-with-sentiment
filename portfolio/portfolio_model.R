@@ -11,7 +11,6 @@ library(scales)
 data <- read_csv("portfolio/portfolio_data.csv")
 data[2:104] <- scale(data[2:104])
 data <- as.data.frame(t(data))
-t = t(data)
 data <- na.omit(data)
 data <- data[,order(ncol(data):1)]
 names(data) <- as.character(unlist(data[1,]))
