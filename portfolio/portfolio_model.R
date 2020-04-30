@@ -13,15 +13,14 @@ data[2:104] <- scale(data[2:104])
 data <- as.data.frame(t(data))
 data <- na.omit(data)
 data <- data[,order(ncol(data):1)]
-names(data) <- as.character(unlist(data[1,]))
+names(data) <- as.matrix(data[1, ])
+data[] <- lapply(data, function(x) as.numeric(as.character(x)))
 data <- data[-1,]
 
-View(data)
 ## Split data for portfolio and for selecting model dropping ticker symbol and the tag 
 smp_size <- floor(0.5 * nrow(data))
 train_ind <- sample(seq_len(nrow(data)), size = smp_size)
 model_data <- data[train_ind, ]
-model_data <- model_data[-c(1)]
 port_data <- data[-train_ind, ]
 
 
@@ -33,21 +32,19 @@ test <- model_data[-train_ind, ]
 test_real <- as.vector(test[[c(1)]])
 
 
-results <- tibble(x = 0, model = 0, mse = 0)
-
 
 for (x in 2:ncol(train)) {
   y <- train[c(1:x)]
   y_test <- test[c(2:x)]
   
   ## Linear
-  fit <- lm(y$ ~ ., data = y)
+  fit <- lm(y$x6_15_2016 ~ ., data = y)
   fit_predict <- predict(fit, y_test)
   mse <- mean_squared_error(test_real, fit_predict)
   results <- results %>% add_row(x = x, model = "linear", mse = mse)
-  
+
   ## Decision Tree
-  tree <- rpart(y$`10/2/2019` ~ ., y)
+  tree <- rpart(y$x6_15_2016 ~ ., y)
   fit_predict <- predict(tree, y_test)
   mse <- mean_squared_error(test_real, fit_predict)
   results <- results %>% add_row(x = x, model = "Decision Tree", mse = mse)
@@ -55,13 +52,13 @@ for (x in 2:ncol(train)) {
   ## Random Forest
   y <- clean_names(y)
   y_test <- clean_names(y_test)
-  rf <- randomForest(x10_2_2019 ~ ., y, ntree = 250, do.trace = F)
+  rf <- randomForest(x6_15_2016 ~ ., y, ntree = 250, do.trace = F)
   fit_predict <- predict(rf, y_test)
   mse <- mean_squared_error(test_real, fit_predict)
   results <- results %>% add_row(x = x, model = "RForest", mse = mse)
  
   # Boosting
-  boost <- gbm(x10_2_2019 ~ . , 
+  boost <- gbm(x6_15_2016 ~ . , 
                data = y,
                n.trees = 250,
                shrinkage = .001)
