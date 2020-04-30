@@ -11,11 +11,15 @@ library(scales)
 data <- read_csv("portfolio/portfolio_data.csv")
 data[2:104] <- scale(data[2:104])
 data <- as.data.frame(t(data))
+t = t(data)
 data <- na.omit(data)
 data <- data[,order(ncol(data):1)]
 
 View(data)
-## Split data for portfolio and for selecting model dropping ticker symbol and the tag 
+## Split data for portfolio and for selecting model dropping ticker symbol and the tag
+
+names(data) = data[1,]
+
 smp_size <- floor(0.5 * nrow(data))
 train_ind <- sample(seq_len(nrow(data)), size = smp_size)
 model_data <- data[train_ind, ]
