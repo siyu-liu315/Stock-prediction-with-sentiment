@@ -17,7 +17,9 @@ names(data) <- as.matrix(data[1, ])
 data[] <- lapply(data, function(x) as.numeric(as.character(x)))
 data <- data[-1,]
 
-## Split data for portfolio and for selecting model dropping ticker symbol and the tag 
+
+View(data)
+## Split data for portfolio and for selecting model dropping ticker symbol and the tag
 smp_size <- floor(0.5 * nrow(data))
 train_ind <- sample(seq_len(nrow(data)), size = smp_size)
 model_data <- data[train_ind, ]

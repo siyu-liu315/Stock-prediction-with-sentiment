@@ -5,6 +5,7 @@ library(readxl)
 library(tidytext)
 library(gbm)
 
+
 stock <- c("AAL","AAPL","ADBE","ADP","ADSK","AKAM",
            "ALXN","AMAT","AMGN","AMZN","ATVI","AVGO","BBBY",
            "BIDU","BMRN","CA","CELG","CERN","CHKP","CHTR","CMCSA","COST","CSCO",
@@ -21,16 +22,14 @@ temp <- df1 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>%
   separate(Symbols,into = paste('v',1:28))
 df1_clean <- temp %>% pivot_longer(cols = `v 1`:`v 28`,
                             names_to = 'pos',
-                            values_to = 'symbol',
-                            values_adrop_na = T) %>% select(-pos) %>% 
+                            values_to = 'symbol') %>% select(-pos) %>% 
 filter(symbol %in% stock)
 
 temp2 <- df2 %>% select(`Tweet content`,Date,RTs,Favs,Followers,Symbols)%>% 
   separate(Symbols,into = paste('v',1:28))
 df2_clean <- temp2 %>% pivot_longer(cols = `v 1`:`v 28`,
                                    names_to = 'pos',
-                                   values_to = 'symbol',
-                                   values_drop_na = T) %>% select(-pos) %>% 
+                                   values_to = 'symbol') %>% select(-pos) %>% 
   filter(symbol %in% stock)
 
 df_content <- rbind(df1_clean,df2_clean)
@@ -98,8 +97,8 @@ df_1 <- df_cla %>% select(date,tic,pct,buy,sentiment_score) %>%
   arrange(tic) %>% mutate(lag_sen = lag(sentiment_score),
                              lag_pct = lag(pct))
 
-df_class <- df_1 %>% filter(date != '2016-03-10')
-df_class <-  df_class %>% select(date,buy,lag_pct,lag_sen) 
+df_class1 <- df_1 %>% filter(date != '2016-03-10')
+df_class <-  df_class1 %>% select(date,buy,lag_pct,lag_sen) 
 
 
 ##function return overall acurracy
@@ -121,17 +120,21 @@ get_accuracy<- function(train, test){
 
 lst <- list()
 
-for(n in seq_len(19)){
+for(n in seq_len(7)){
   column_name = paste('lag',n+1,sep = '_')
   df_class[[column_name]] <- lag(df_class$lag_sen,n+1)
   date_remove <- df_class$date[is.na(df_class[[column_name]])]
-  df_class <- df_class %>% filter(date != date_remove)
+  df_class <- df_class %>% filter(!date %in% date_remove)
   train <- df_class %>% filter(date < as.Date('2016-05-31')) %>% select(-date)
   test <- df_class %>% filter(date >= as.Date('2016-05-31')) %>% select(-date)
   print(nrow(train))
   print(nrow(test))
   lst[n] <- get_accuracy(train, test)
 }
+
+
+
+
 
 
 
@@ -159,20 +162,66 @@ ggplot(df_result,aes(x = windows, y = accuracy))+
 
 
 
-### boosting 
-## but not defined as a classification 
-fit_boost <- gbm(f1,
-                  data = train,
-                            distribution = "gaussian",
-                            n.trees = 100,
-                            interaction.depth = 2,
-                            shrinkage = 0.001)
+# ### boosting 
+# ## but not defined as a classification 
+# fit_boost <- gbm(f1,
+#                   data = train,
+#                             distribution = "gaussian",
+#                             n.trees = 100,
+#                             interaction.depth = 2,
+#                             shrinkage = 0.001)
+# 
+# pred = predict.gbm(object = fit_boost,
+#                    newdata = test,
+#                    n.trees = 100,
+#                    type = "response")
+# 
+# confusionMatrix(round(pred),test$buy)
+# confusionMatrix(yhat.train.tree,train$buy)
 
-pred = predict.gbm(object = fit_boost,
-                   newdata = test,
-                   n.trees = 100,
-                   type = "response")
 
-confusionMatrix(round(pred),test$buy)
-confusionMatrix(yhat.train.tree,train$buy)
+###for y_hat
+
+df_1 <- df_cla %>% select(date,tic,pct,buy,sentiment_score) %>% 
+  arrange(tic) %>% mutate(lag_sen = lag(sentiment_score),
+                          lag_pct = lag(pct))
+
+df_class <- df_1 %>% filter(date != '2016-03-10')
+df_class <-  df_class %>% select(date,buy,lag_pct,lag_sen) 
+
+
+for (n in 1:8){
+column_name = paste('lag',n+1,sep = '_')
+df_class[[column_name]] <- lag(df_class$lag_sen,n+1)
+}
+
+
+date_remove <- df_class$date[is.na(df_class[[column_name]])]
+df_sevenday <- df_class %>% filter(!date %in% date_remove)
+
+
+train <- df_sevenday %>% filter(date < as.Date('2016-05-31')) %>% select(-date)
+test <- df_sevenday %>% filter(date >= as.Date('2016-05-31')) %>% select(-date)
+
+
+f2 <- as.formula(buy ~ .)
+trees <- randomForest(f2, train,
+                        ntree=200,
+                        do.trace=F)
+yhat.test.tree <- predict(trees, test)
+yhat.train.tree <- predict(trees, train)
+a <- confusionMatrix(yhat.test.tree,test$buy)
+
+
+yhat <- predict(trees,df_sevenday)
+df_sevenday$yhat <- yhat
+
+label <- df_class1  %>% filter(!date %in% date_remove)%>% select(tic)
+output <- cbind(label,df_sevenday)
+output <- output %>% select(tic,date,buy, yhat)
+
+write.csv(output,'label_output')
+
+
+a <- read.csv('label_output')
 
