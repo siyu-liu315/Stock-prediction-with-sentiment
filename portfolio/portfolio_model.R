@@ -55,7 +55,7 @@ for (x in 2:ncol(train)){
   ## Random Forest
   y <- clean_names(y)
   y_test <- clean_names(y_test)
-  rf <- randomForest(x6_15_2016 ~ ., y, ntree = 250, do.trace = F)
+  rf <- randomForest(x6_15_2016 ~ ., y, ntree = 2500, do.trace = F)
   fit_predict <- predict(rf, y_test)
   mse <- mean_squared_error(test_real, fit_predict)
   results <- results %>% add_row(x = x, model = "RForest", mse = mse)
@@ -97,25 +97,26 @@ results[1,]
 
 ## Creating the Final Model
 #### The Best performing model from above was simple linear regression with a window of 54
-final_model_data <- model_data[2:9]
-colnames(final_model_data) <- c(1:8)
+final_model_data <- port_data[2:10]
+colnames(final_model_data) <- c(1:9)
 final_model <- lm(final_model_data$`1` ~ ., data = final_model_data)
 
 ## Preparing The Portfolio Data
 port_data <- port_data[1:9]
 real_port <- port_data[c(1)]
 port_data <- port_data[-c(1)]
-colnames(port_data) <- c(1:8)
+colnames(port_data) <- c(2:9)
 
 ## Predicting For Portfolio Data
 port_predictions <- predict(final_model, port_data)
 port_data <- cbind(port_predictions, real_port, port_data)
-port_data <- port_data %>%  mutate(spread = (port_predictions - port_data$`1`))
+port_data <- port_data %>%  mutate(spread = (port_predictions - port_data$`2`))
 port_data <- port_data[order(port_data$spread, decreasing = T),] 
-port_data <- port_data %>% mutate(actual_spread = (port_data$`1` - port_data$`6/15/2016`))
+port_data <- port_data %>% mutate(actual_spread = (port_data$`6/15/2016` - port_data$`2`))
 
 ### Winning Basket
 winning_basket <- port_data[1:5,]
+
 
 ### Random Baskets For Comparision 
 rb1 <- port_data %>% sample_n(5)
