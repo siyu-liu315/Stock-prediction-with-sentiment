@@ -218,7 +218,10 @@ df_sevenday$yhat <- yhat
 
 label <- df_class1  %>% filter(!date %in% date_remove)%>% select(tic)
 output <- cbind(label,df_sevenday)
+output <- output %>% select(tic,date,buy, yhat)
 
-print(a) %>% 
-return(a$overall)
+write.csv(output,'label_output')
+
+
+a <- read.csv('label_output')
 
