@@ -1,13 +1,13 @@
-Name, Gains Or Losses ,Beat Winner,Beat Aggregate
-Winner, $(15.02),No,No
-Basket1, $(14.14),Yes,No
-Basket2, $(20.12),No,No
-Basket3, $(22.58),No,No
-Basket4, $(10.32),Yes,Yes
-Basket5, $(15.40),No,No
-Basket6, $(9.02),Yes,Yes
-Basket7, $(11.59),Yes,No
-Basket8, $(9.46),Yes,Yes
-Basket9, $(8.92),Yes,Yes
-Basket10, $(14.12),Yes,No
-,,,
+Name,Gains_Losses,Average,Beat_Winner,Beat_Aggregate
+Winner,0.220,0.044,--,Yes
+Basket1,-0.249,-0.050,No,No
+Basket2,0.055,0.011,No,Yes
+Basket3,-0.153,-0.031,No,No
+Basket4,-0.018,-0.004,No,Yes
+Basket5,-0.345,-0.069,No,No
+Basket6,-0.472,-0.094,No,No
+Basket7,-0.400,-0.080,No,No
+Basket8,-0.076,-0.015,No,Yes
+Basket9,-0.313,-0.063,No,No
+Basket10,-0.205,-0.041,No,No
+* Numbers were scaled,,,0%,50%

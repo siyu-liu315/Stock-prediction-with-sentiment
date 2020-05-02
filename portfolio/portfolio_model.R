@@ -18,7 +18,6 @@ data[] <- lapply(data, function(x) as.numeric(as.character(x)))
 data <- data[-1,]
 
 
-View(data)
 ## Split data for portfolio and for selecting model dropping ticker symbol and the tag
 smp_size <- floor(0.5 * nrow(data))
 train_ind <- sample(seq_len(nrow(data)), size = smp_size)
@@ -99,11 +98,13 @@ results[1,]
 
 ## Creating the Final Model
 #### The Best performing model from above was simple linear regression with a window of 54
-final_model_data <- port_data[2:10]
+final_model_data <- model_data[2:10]
 colnames(final_model_data) <- c(1:9)
 final_model <- lm(final_model_data$`1` ~ ., data = final_model_data)
 
 ## Preparing The Portfolio Data
+tickers <- tibble::rownames_to_column(port_data, "VALUE")
+tickers <- tickers %>% select(VALUE)
 port_data <- port_data[1:9]
 real_port <- port_data[c(1)]
 port_data <- port_data[-c(1)]
@@ -111,14 +112,11 @@ colnames(port_data) <- c(2:9)
 
 ## Predicting For Portfolio Data
 port_predictions <- predict(final_model, port_data)
-port_data <- cbind(port_predictions, real_port, port_data)
+port_data <- cbind(tickers$VALUE, port_predictions, real_port, port_data)
 port_data <- port_data %>%  mutate(spread = (port_predictions - port_data$`2`))
 port_data <- port_data[order(port_data$spread, decreasing = T),] 
 port_data <- port_data %>% mutate(actual_spread = (port_data$`6/15/2016` - port_data$`2`))
-
-### Winning Basket
-winning_basket <- port_data[1:5,]
-
+aggregate <- mean(port_data$actual_spread)
 
 ### Random Baskets For Comparision 
 rb1 <- port_data %>% sample_n(5)
@@ -141,7 +139,14 @@ rb9 <- port_data %>% sample_n(5)
 set.seed(10)
 rb10 <- port_data %>% sample_n(5)
 
+## Adding Sentiment Piece
+labels <- read_csv("label_output")
+labels <- labels %>% filter(date == "2016-06-15")
+port_data <- inner_join(port_data, labels, by= c("tickers$VALUE" = "tic"))
+port_data <- port_data %>%  filter(buy == 0)
 
+### Winning Basket
+winning_basket <- port_data[1:5,]
 
 ### Gains/Losses
 Gains_Losses <- c(sum(winning_basket$actual_spread),
@@ -184,7 +189,7 @@ Name <- c('Winner',
 
 Portfolio <- data.frame(Name, Gains_Losses, Average)
 Portfolio <- Portfolio %>%  mutate(Beat_Winner = if_else(Gains_Losses > Portfolio[1,2], "Yes", "No"))
-Portfolio <- Portfolio %>%  mutate(Beat_Aggregate = if_else(Average > mean(port_data$actual_spread), "Yes", "No"))
+Portfolio <- Portfolio %>%  mutate(Beat_Aggregate = if_else(Average > aggregate, "Yes", "No"))
 
 ### Doing Some Analysis
 Analysis <- Portfolio[2:11,]
@@ -197,4 +202,4 @@ percent(mean(Analysis$Beat_Winner))
 ### Amount That Beat The Aggregate
 percent(mean(Analysis$Beat_Aggregate))
 
-
+write.csv(Portfolio, file = "portfolio/portfolio_table.csv")
