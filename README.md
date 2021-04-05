@@ -1,2 +1,2 @@
-# Tema8-888
+# Stock prediction with sentiment
 capstone
